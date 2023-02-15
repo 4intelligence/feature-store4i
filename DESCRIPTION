@@ -1,7 +1,7 @@
 Package: fs4i
 Type: Package
 Title: Feature Store 4intelligence
-Version: 0.1.0
+Version: 1.0.1
 Author: 4intelligence
 Maintainer: João Gustavo
     <joao@4intelligence.com.br>

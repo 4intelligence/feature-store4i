@@ -119,6 +119,9 @@ get_serie <- function(serie_code, estimate) {
   projections$estimated = TRUE
 
   complete_df <- rbind(observations, projections)
+
+  complete_df <- complete_df[!duplicated(complete_df$date), ]
+
   return(list(complete_df, series_metadata))
 }
 
