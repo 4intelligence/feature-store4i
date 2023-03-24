@@ -13,9 +13,9 @@
 get_url <- function(endpoint, api) {
 
   if(api == "fs") {
-    base_url <- "https://4i-featurestore-prod-api.azurewebsites.net/api/v1/"
+    base_url <- "https://run-prod-4casthub-featurestore-api-zdfk3g7cpq-ue.a.run.app/api/v1/"
   } else if(api == "data-loader") {
-    base_url <- "https://fs-data-loader-api-co6be3hgrq-uc.a.run.app/api/v1/"
+    base_url <- "https://run-prod-fs-data-loader-api-zdfk3g7cpq-ue.a.run.app/api/v1/"
   }
 
   return(paste0(base_url, endpoint))
