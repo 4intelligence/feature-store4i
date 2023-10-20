@@ -2,7 +2,6 @@
 
 export(get_multi_series)
 export(get_serie)
-export(insert_series)
 export(login)
 importFrom(httr,POST)
 importFrom(httr,add_headers)
