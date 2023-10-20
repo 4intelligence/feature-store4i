@@ -1,10 +1,10 @@
 Package: fs4i
 Type: Package
 Title: Feature Store 4intelligence
-Version: 1.0.2
+Version: 1.1.1
 Author: 4intelligence
-Maintainer: João Gustavo
-    <joao@4intelligence.com.br>
+Maintainer: André Fillipi
+    <a.goes@4intelligence.ai>
 Description: Access the Feature Store repository
 License: MLP-2
 Encoding: UTF-8
