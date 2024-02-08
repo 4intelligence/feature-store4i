@@ -18,7 +18,7 @@ get_access_token <- function(config_file = paste0(system.file(package = "fs4i"),
   DOMAIN <- "4intelligence.auth0.com"
 
   if(!file.exists(config_file)){
-    stop("Login to 4CastHub has not been set up yet.\nPlease use function 'fs4i::login()' to authenticate.")
+    stop("[fs4i::login] Login to Feature Store has not been set up yet.\nPlease use function 'fs4i::login()' to authenticate.")
 
   } else {
 

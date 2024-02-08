@@ -20,6 +20,13 @@ fix_null = function(value) {
   return(value)
 }
 
+fix_null_obs = function(value) {
+  if(is.null(value)) {
+    return(NA_real_)
+  }
+  return(value)
+}
+
 get_serie <- function(serie_code, estimate) {
   access_token <- get_access_token()
   headers <- c("authorization"= paste0("Bearer ", access_token))
@@ -32,9 +39,11 @@ get_serie <- function(serie_code, estimate) {
   series_metadata <- NULL
   response <- httr::GET(url, httr::add_headers(.headers=headers))
   if(response$status_code == 401) {
-    message("API Status Code: ", response$status_code, ".\nInvalid Authentication.\nYou should try fs4i::login()")
+    stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nInvalid Authentication.\nYou should try fs4i::login()")
+  } else if(response$status_code == 404) {
+    stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\n", serie_code, " is not available on Feature Store.")
   } else if(response$status_code >= 400) {
-    message("API Status Code: ", response$status_code, ".\nAn error ocurred.")
+    stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nAn error ocurred during the request.")
   } else {
     list_metadata <- httr::content(response)$data
 
@@ -70,6 +79,10 @@ get_serie <- function(serie_code, estimate) {
   r_content <- httr::content(response)
   total <- as.integer(r_content$total)
 
+  if(total == 0) {
+    stop("[fs4i::get_serie] ", serie_code, " is empty.")
+  }
+
   temp_observations <- data.frame(t(do.call(cbind, r_content$data)))
   observations <- rbind(observations, temp_observations)
   while(length(observations$date) < total) {
@@ -81,6 +94,8 @@ get_serie <- function(serie_code, estimate) {
     temp_observations <- data.frame(t(do.call(cbind, r_content$data)))
     observations <- rbind(observations, temp_observations)
   }
+
+  observations$value <- lapply(observations$value, fix_null_obs)
 
   if(!estimate) {
     return(list(observations, series_metadata))

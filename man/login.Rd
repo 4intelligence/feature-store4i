@@ -2,7 +2,7 @@
 % Please edit documentation in R/login.R
 \name{login}
 \alias{login}
-\title{Login to 4CastHub}
+\title{Login to Feature Store}
 \usage{
 login(username, password)
 }
@@ -16,7 +16,7 @@ This function is used to validate the two factor authentication of your 4CastHub
 \dontrun{
 if(interactive()){
  #EXAMPLE1
- faas4i::login()
+ fs4i::login()
  ## Once the url is printed, copy and paste it to your browser and follow with authentication
  }
 }
