@@ -1,4 +1,4 @@
-#' @title Login to 4CastHub
+#' @title Login to Feature Store
 #' @description This function is used to validate the two factor authentication of your 4CastHub user. If you select the checkbox 'Remember this device por 30 days', the login only needs to be done once every 30 days.
 #'
 #' @return A file with your authentication will be saved at your package location.
@@ -6,7 +6,7 @@
 #' \dontrun{
 #' if(interactive()){
 #'  #EXAMPLE1
-#'  faas4i::login()
+#'  fs4i::login()
 #'  ## Once the url is printed, copy and paste it to your browser and follow with authentication
 #'  }
 #' }
@@ -54,15 +54,15 @@ login <- function() {
 
   if(httr::status_code(response) >= 400){
 
-    message("\nSomething went wrong!\n",
+    message("\n[fs4i::login] Something went wrong!\n",
             httr::content(token_response)[["error_description"]],
-            "\nPlease restart the login flow running `faas4i::login()`.")
+            "\nPlease restart the login flow running `fs4i::login()`.")
 
   }else{
     response_content <- httr::content(response)
     verification_url <- response_content$verification_uri_complete
 
-    message("Please copy and paste the URL below in your browser to authorize your device.",
+    message("[fs4i::login] Please copy and paste the URL below in your browser to authorize your device.",
             "\nDevice verification URI: ", verification_url)
 
     config_dict <- list("auths" = list("4intelligence.auth0.com" = response_content))
@@ -72,7 +72,7 @@ login <- function() {
     payload_token <- paste0("grant_type=urn:ietf:params:oauth:grant-type:device_code&device_code=", device_code,
                             "&client_id=", CLIENT_ID)
 
-    message("Waiting for URI Authentication...")
+    message("[fs4i::login] Waiting for URI Authentication...")
     pb <- txtProgressBar(1, TOKEN_ETA, style=3)
     for (i in seq(from = 1, to = TOKEN_ETA)){
       Sys.sleep(1)
@@ -91,9 +91,9 @@ login <- function() {
       config_dict[["auths"]][[DOMAIN]] =c(config_dict[["auths"]][[DOMAIN]], httr::content(token_response))
       write(jsonlite::toJSON(config_dict, auto_unbox = TRUE), paste0(system.file(package = "fs4i"),"/config.json"))
 
-      message("\nLogin successful!")
+      message("\n[fs4i::login] Login successful!")
     } else{
-      message("\nSomething went wrong!\n",
+      message("\n[fs4i::login] Something went wrong!\n",
               httr::content(token_response)[["error_description"]],
               "\nPlease restart the login flow running `fs4i::login()`.")
     }

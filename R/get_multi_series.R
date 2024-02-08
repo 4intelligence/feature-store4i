@@ -38,13 +38,17 @@ get_multi_series <- function(series_code, estimate) {
   )
 
   for (serie_code in series_code) {
-    response <- get_serie(serie_code, estimate)
-    data <- response[[1]]
-    metadata <- response[[2]]
+    response <- try(get_serie(serie_code, estimate))
+    if (inherits(response, 'try-error')) {
+      message("[fs4i::get_multi_series] Skipping ", serie_code, ".")
+    } else {
+      data <- response[[1]]
+      metadata <- response[[2]]
 
-    data$serie <- metadata$code
-    df_observations <- rbind(df_observations, data)
-    df_metadata <- rbind(df_metadata, metadata)
+      data$serie <- metadata$code
+      df_observations <- rbind(df_observations, data)
+      df_metadata <- rbind(df_metadata, metadata)
+    }
   }
 
   return(list(df_observations, df_metadata))
