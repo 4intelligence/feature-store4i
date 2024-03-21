@@ -133,8 +133,15 @@ get_serie <- function(serie_code, estimate) {
   observations$estimated = FALSE
   projections$estimated = TRUE
 
-  complete_df <- rbind(observations, projections)
+  obs_dates <- list(observations$date)
+  last_date <- sapply(obs_dates, tail, 1)
 
+  if(is.character(last_date) == FALSE){
+    last_date <- sapply(last_date, tail, 1)
+  }
+
+  filtered_projections <- projections[projections$date > last_date,]
+  complete_df <- rbind(observations, filtered_projections)
   complete_df <- complete_df[!duplicated(complete_df$date), ]
 
   return(list(complete_df, series_metadata))
