@@ -36,12 +36,17 @@ get_serie <- function(serie_code, estimate) {
   endpoint_metadata <- paste0("series/", serie_code)
   url <- get_url(endpoint_metadata, "fs")
 
+  message("[fs4i::get_serie] Requesting data for ", serie_code)
+  Sys.sleep(1) # Pause for 1 second
+
   series_metadata <- NULL
   response <- httr::GET(url, httr::add_headers(.headers=headers))
   if(response$status_code == 401) {
     stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nInvalid Authentication.\nYou should try fs4i::login()")
   } else if(response$status_code == 404) {
     stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\n", serie_code, " is not available on Feature Store.")
+  } else if(response$status_code == 429) {
+    stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nToo many requests, rate limit exceeded! Try again in a minute.")
   } else if(response$status_code >= 400) {
     stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nAn error ocurred during the request.")
   } else {
@@ -74,28 +79,39 @@ get_serie <- function(serie_code, estimate) {
   url <- get_url(endpoint_observations, "fs")
   params <- "?limit=2000&skip="
 
+  Sys.sleep(1) # Pause for 1 second
   request_url <- paste0(url, params, "0")
   response <- httr::GET(request_url, httr::add_headers(.headers=headers))
-  r_content <- httr::content(response)
-  total <- as.integer(r_content$total)
 
-  if(total == 0) {
-    stop("[fs4i::get_serie] ", serie_code, " is empty.")
-  }
-
-  temp_observations <- data.frame(t(do.call(cbind, r_content$data)))
-  observations <- rbind(observations, temp_observations)
-  while(length(observations$date) < total) {
-    skip <- length(observations$date)
-    request_url <- paste0(url, params, skip)
-    response <- httr::GET(request_url, httr::add_headers(.headers=headers))
-
+  if(response$status_code == 429) {
+    stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nToo many requests, rate limit exceeded! Try again in a minute.")
+  } else {
     r_content <- httr::content(response)
+    total <- as.integer(r_content$total)
+
+    if(total == 0) {
+      stop("[fs4i::get_serie] ", serie_code, " is empty.")
+    }
+
     temp_observations <- data.frame(t(do.call(cbind, r_content$data)))
     observations <- rbind(observations, temp_observations)
-  }
+    while(length(observations$date) < total) {
+      skip <- length(observations$date)
+      request_url <- paste0(url, params, skip)
+      Sys.sleep(1) # Pause for 1 second
+      response <- httr::GET(request_url, httr::add_headers(.headers=headers))
 
-  observations$value <- lapply(observations$value, fix_null_obs)
+      if(response$status_code == 429) {
+        stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nToo many requests, rate limit exceeded! Try again in a minute.")
+      }
+
+      r_content <- httr::content(response)
+      temp_observations <- data.frame(t(do.call(cbind, r_content$data)))
+      observations <- rbind(observations, temp_observations)
+    }
+
+    observations$value <- lapply(observations$value, fix_null_obs)
+  }
 
   if(!estimate) {
     return(list(observations, series_metadata))
@@ -109,25 +125,38 @@ get_serie <- function(serie_code, estimate) {
   params <- "?limit=2000&skip="
 
   request_url <- paste0(url, params, "0")
+  Sys.sleep(1) # Pause for 1 second
   response <- httr::GET(request_url, httr::add_headers(.headers=headers))
-  r_content <- httr::content(response)
-  total <- as.integer(r_content$total)
 
-  if(total == 0) {
-    observations$estimated = FALSE
-    return(list(observations, series_metadata))
-  }
-
-  temp_projections <- data.frame(t(do.call(cbind, r_content$data)))
-  projections <- rbind(projections, temp_projections)
-  while(length(projections$date) < total) {
-    skip <- length(projections$date)
-    request_url <- paste0(url, params, skip)
-    response <- httr::GET(request_url, httr::add_headers(.headers=headers))
-
+  if(response$status_code == 429) {
+    stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nToo many requests, rate limit exceeded! Try again in a minute.")
+  } else {
     r_content <- httr::content(response)
+    total <- as.integer(r_content$total)
+
+    if(total == 0) {
+      observations$estimated = FALSE
+      return(list(observations, series_metadata))
+    }
+
     temp_projections <- data.frame(t(do.call(cbind, r_content$data)))
     projections <- rbind(projections, temp_projections)
+    while(length(projections$date) < total) {
+      skip <- length(projections$date)
+      request_url <- paste0(url, params, skip)
+      Sys.sleep(1) # Pause for 1 second
+      response <- httr::GET(request_url, httr::add_headers(.headers=headers))
+
+      if(response$status_code == 429) {
+        stop("[fs4i::get_serie] API Status Code: ", response$status_code, ".\nToo many requests, rate limit exceeded! Try again in a minute.")
+      }
+
+      r_content <- httr::content(response)
+      temp_projections <- data.frame(t(do.call(cbind, r_content$data)))
+      projections <- rbind(projections, temp_projections)
+    }
+
+    projections$value <- lapply(projections$value, fix_null_obs)
   }
 
   observations$estimated = FALSE
