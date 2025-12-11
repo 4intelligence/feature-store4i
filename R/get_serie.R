@@ -37,7 +37,8 @@ get_serie <- function(serie_code, estimate) {
   url <- get_url(endpoint_metadata, "fs")
 
   message("[fs4i::get_serie] Requesting data for ", serie_code)
-  Sys.sleep(1) # Pause for 1 second
+  # Pause for 1 second to comply with rate limit
+  # Sys.sleep(1)
 
   series_metadata <- NULL
   response <- httr::GET(url, httr::add_headers(.headers=headers))
@@ -79,7 +80,8 @@ get_serie <- function(serie_code, estimate) {
   url <- get_url(endpoint_observations, "fs")
   params <- "?limit=2000&skip="
 
-  Sys.sleep(1) # Pause for 1 second
+  # Pause for 1 second to comply with rate limit
+  # Sys.sleep(1)
   request_url <- paste0(url, params, "0")
   response <- httr::GET(request_url, httr::add_headers(.headers=headers))
 
@@ -98,7 +100,8 @@ get_serie <- function(serie_code, estimate) {
     while(length(observations$date) < total) {
       skip <- length(observations$date)
       request_url <- paste0(url, params, skip)
-      Sys.sleep(1) # Pause for 1 second
+      # Pause for 1 second to comply with rate limit
+      # Sys.sleep(1)
       response <- httr::GET(request_url, httr::add_headers(.headers=headers))
 
       if(response$status_code == 429) {
@@ -125,7 +128,8 @@ get_serie <- function(serie_code, estimate) {
   params <- "?limit=2000&skip="
 
   request_url <- paste0(url, params, "0")
-  Sys.sleep(1) # Pause for 1 second
+  # Pause for 1 second to comply with rate limit
+  # Sys.sleep(1)
   response <- httr::GET(request_url, httr::add_headers(.headers=headers))
 
   if(response$status_code == 429) {
@@ -144,7 +148,8 @@ get_serie <- function(serie_code, estimate) {
     while(length(projections$date) < total) {
       skip <- length(projections$date)
       request_url <- paste0(url, params, skip)
-      Sys.sleep(1) # Pause for 1 second
+      # Pause for 1 second to comply with rate limit
+      # Sys.sleep(1)
       response <- httr::GET(request_url, httr::add_headers(.headers=headers))
 
       if(response$status_code == 429) {
